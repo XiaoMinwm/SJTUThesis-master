@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 上海交通大学学位论文模板
 
 [English README](README_en-US.md)
@@ -102,3 +103,6 @@ SJTUThesis提供了多个稳定版供您使用，这些版本的输出结果具�
 [0.8.8]: https://github.com/weijianwen/SJTUThesis/releases/tag/0.8.8
 [0.7.8]: https://github.com/weijianwen/SJTUThesis/releases/tag/0.7.8
 [0.7.1]: https://github.com/weijianwen/SJTUThesis/releases/tag/0.7.1
+=======
+# sjtu_thesis
+>>>>>>> ea4899b432277d4680c8b6a2733b7701da12ddfd
