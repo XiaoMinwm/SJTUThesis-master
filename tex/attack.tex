@@ -22,7 +22,7 @@
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[scale=0.29]{att/threatModel1.png}
+  \includegraphics[scale=0.45]{att/threatModel1.png}
   \caption{FSI攻击威胁模型}
   \label{fig1}
 \end{figure}
@@ -31,7 +31,7 @@
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[scale=0.3]{att/ASC2.png}
+  \includegraphics[scale=0.45]{att/ASC2.png}
   \caption{FSI攻击构造示意图}
   \label{fig2}
 \end{figure}
@@ -47,7 +47,7 @@
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[scale=0.3]{att/database2.eps}
+  \includegraphics[scale=0.45]{att/database2.eps}
   \caption{对PLC采样数据示意图}
   \label{fig3}
 \end{figure}
@@ -133,12 +133,13 @@ I_l\_0~or~O_l\_0,~if~ I_l(j+1)-I_l(j)=-1\\
 
 本节我们提出了一个辨识算法用来生成上一节中所描述的NDAAO模型。我们定义辨识参数$ k $用于确定用于生成新状态的$I/O$向量序列的长度。如果生成的NDAAO模型的长度为$ k $的语义集合正好与观测时采样数据产生的长度为$k$的语义集合一致的话，这样的NDAAO模型被称为$ k $完全可观测的。
 
-NDAAO的构造主要分为三个步骤。首先，我们将观察到的序列转换为一组长度为$ k $的词组序列并在每组的第一个状态前创建一组长度为$ k-1 $ 伪状态以确保与其他词语一致。算法1的第一部分表示了观测序列的转换过程。然后我们开始执行NDAAO辨识操作， 将NDAAO的状态集与长度为$ k $的词组集相关联，并且转移函数由长度为$ k+1 $的词语表示。算法1的第二部分表示了NDAAO的辨识过程​​。最后，我们合并等效状态来对状态空间进行降维，对于任意两个不同的状态$ x_i $和$ x_j $，如果它们相关联的输出相同并且它们具有相同的后继状态集，则我们可以将这两个状态合并到一个状态。我们通过从NDAAO的状态集和转移函数绘制状态转移图来使模型可视化。具体过程如算法1的第三部分所示。
+NDAAO的构造主要分为三个步骤。首先，我们将观察到的序列转换为一组长度为$ k $的词组序列并在每组的第一个状态前创建一组长度为$ k-1 $ 伪状态以确保与其他词语一致。算法1的第一部分表示了观测序列的转换过程。然后我们开始执行NDAAO辨识操作， 将NDAAO的状态集与长度为$ k $的词组集相关联，并且转移函数由长度为$ k+1 $的词语表示。算法\ref{algo:ndaao}的第二部分表示了NDAAO的辨识过程​​。最后，我们合并等效状态来对状态空间进行降维，对于任意两个不同的状态$ x_i $和$ x_j $，如果它们相关联的输出相同并且它们具有相同的后继状态集，则我们可以将这两个状态合并到一个状态。我们通过从NDAAO的状态集和转移函数绘制状态转移图来使模型可视化。具体过程如算法\ref{algo:ndaao}的第三部分所示。
 
 \renewcommand{\algorithmicrequire}{\textbf{输入:}}
 \renewcommand{\algorithmicensure}{\textbf{输出:}}
 \begin{algorithm}[h]
-  \caption{Construction of the NDAAO}
+  \caption{NDAAO构造算法}
+  \label{algo:ndaao}
   \begin{algorithmic}[1]
     \REQUIRE %算法的输入参数：Input  
     观测的$I/O$序列（采样数据） $\varSigma$ 和辨识参数 $k$ \\  
@@ -187,6 +188,38 @@ NDAAO的构造主要分为三个步骤。首先，我们将观察到的序列转
     \STATE 对$G(V,E)$画图;
   \end{algorithmic}
 \end{algorithm}
+
+\textbf{例子1.} 考虑从无故障例子系统中采样三组向量序列: $\gamma_1=(A,B,C,D,E,A)$, $\gamma_2=(A,B,D,C,D,E,A)$, $\gamma_3=(A,D,B,C,D,F,E,A)$. 大写字母代表不同的$I/O$向量。这里我们选取辨识参数$k=2$，经过序列转换后我们得到 \[\begin{split} \gamma_1^{k=2}&=(AA,AB,BC,CD,DE,EA)\\ \gamma_2^{k=2}&=(AA,AB,BD,DC,CD,DE,EA)\\\gamma_3^{k=2}&=(AA,AD,DB,BC,CD,DF,FE,EA) \end{split}\] 和 \[\begin{split} \gamma_1^{k=3}&=(AAA,AAB,ABC,BCD,CDE,DEA)\\ \gamma_2^{k=3}&=(AAA,AAB,ABD,BDC,DCD,CDE,DEA)\\\gamma_3^{k=3}&=(AAA,AAD,ADB,DBC,BCD,CDF,\\&\quad \ DFE,FEA) \end{split}\]
+
+在获得$\Sigma^{k=2}$ 和 $\Sigma^{k=3}$之后，我们从$\Sigma^{k=2}$得到状态集并且通过算法\ref{algo:ndaao}的第二部分从$\Sigma^{k=3}$得到转移函数。相应的例子示意如图~\ref{fig5}所示。
+
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[scale=0.44]{att/2dot_graph.png}
+  \caption{经过两步辨识算法得到的NDAAAO模型图示}
+  \label{fig5}
+\end{figure}
+
+初始辨识的模型相比真实系统存在冗余的状态集和边集，因此需要根据算法\ref{algo:ndaao}的第三部分来减少状态空间以简化初始模型。在例1中如果我们将状态$ DB $与状态$ AB $、状态$ BA $与状态$ EA $、状态$ BC $与状态$ DC $均合并，并且对任意$x_i \in X$用$x_i$替换长度为$k$的向量词语。我们得到的简化NDAAO模型如图~\ref{fig6}所示.
+
+\begin{figure}[!htb]{}
+  \centering
+  \includegraphics[scale=0.24]{att/3dot_graph.png}
+  \caption{最终简化的NDAAO模型图示}
+  \label{fig6}
+\end{figure}
+
+\subsection{FSI攻击的构造}
+
+在我们辨识出无故障的NDAAO之后，我们可以利用故障检测的原理构造不可检测的错误序列。我们知道，故障检测是根据当前观测的$I/O$向量与辨识的NDAAO的预期输出是否一致来确定是否存在故障的。如果结果为真，则认为当前观测向量安全，否则给出警报可能存在故障。在我们的攻击方法中，我们构造了错误序列注入攻击，其不仅满足序列输出来自辨识的模型以确保不能被故障机制检测到，而且还通过选择具有恶意执行逻辑的适当长度的错误序列注入到控制器的输入信号中来破坏系统。从$ x_i $开始的长度为$ n $的错误序列的具体形式描述如下定义，
+\begin{equation} 
+S_{x_i}^{n}=\left\{\begin{split} &s\in \Omega^n~|~s=\big( \lambda(x(1),...,\lambda(x(n))) \big)\wedge\\
+&(s\notin L_{Obs}^n):[\exists \big(x(1),...,x(n)\big): x(1)\\&=x_i\in X,~and~
+\forall\;1\leq t\leq n-1,\\&x(t+1)\in f_{nd}(x(t))] \end{split} \right\} 
+\end{equation}
+上述定义$ S_ {x_i} ^ {n} $构造从所识别的NDAAO截取并且不同于观察到的I / O向量的任何序列的长度为$ n $的序列。因此，定义的假序列攻击可以是当注入到受损传感器中时的潜在有害入侵。由于减少的NDAAO是$（k + 1）$ - 完成，建立以下等式。
+根据上述理论，只有长度在$ S_ {x_i} ^ {n} $中不小于$ k-2 $的序列可以是假序列。我们基于识别参数$ k $ is获得从NDAAO生成的所有假序列集合
+由于我们提出假序列的定义，下一步是提出搜索算法以获得所有不可检测的假序列集合。算法2示出使用$ IncSearching $的递归公式可以逐渐获得长度不小于$ k + 2 $的假序列，并且从NDAAO选择并且从观察到的I / O向量的任何子序列不同的那些序列从状态开始$ x_ {init} $。使用$ IncSearching $的输出，我们通过合并所有$ S_ {x_ {init}} $和所有开始状态$ x_ {init} $来获取所有的序列集合$ A ^ k $来自状态$ X $ NDAAO如下，
 
 \section{实验仿真}
 \label{sec:simulation}
