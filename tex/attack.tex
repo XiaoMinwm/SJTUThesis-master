@@ -77,7 +77,7 @@ L_{Obs}^q = \bigcup_{\gamma_i \in \Sigma} \Big(\bigcup_{t=1}^{|\gamma_i|-q+1} (u
 
 \subsubsection{模型选择}
 
-模型辨识的目的是确保辨识的任意长度为$ m $的语义表示$ \textbf {BEH}_{Ident}^m $等于观测到的任意长度为$ m $的语义表示  \（\ textbf {BEH} _ {Obs} ^ m \），其中$ m $可以是任何正整数。 简而言之，所辨识的模型在精度足够高的情况下能够完美复现基于PLC的过程控制系统。考虑到过程控制系统通常是可编程的控制器和物理设备的耦合系统，可编程的控制器可以被认为是确定性的，而物理设备通常被认为是非确定性的。因此，物理设备和控制器的耦合系统一定是非确定性的。因此，我们提出了适合于辨识过程控制系统的非确定性自发输出自动机（NDAAO）\cite {klein2005}。
+模型辨识的目的是确保辨识的任意长度为$ m $的语义表示$ \textbf {BEH}_{Ident}^m $等于观测到的任意长度为$ m $的语义表示  \( \textbf{BEH}_{Obs}^m \)，其中$ m $可以是任何正整数。 简而言之，所辨识的模型在精度足够高的情况下能够完美复现基于PLC的过程控制系统。考虑到过程控制系统通常是可编程的控制器和物理设备的耦合系统，可编程的控制器可以被认为是确定性的，而物理设备通常被认为是非确定性的。因此，物理设备和控制器的耦合系统一定是非确定性的。因此，我们提出了适合于辨识过程控制系统的非确定性自发输出自动机（NDAAO）\parencite{klein2005}。
 
 \textbf{定义3:} NDAAO是由5元组函数表示： \[ NDAAO=(X,\Omega,\textit{f}_{nd},\lambda,x_0) \] with\
 \begin{itemize}
@@ -92,10 +92,101 @@ NDAAO可以由图$G=(V,E)$的形式表示，图$G$的定点集是NDAAO所有的�
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[scale=0.18]{ndaao_example.png}
+  \includegraphics[scale=0.18]{att/ndaao_example.png}
   \caption{NDAAO图形表示}
   \label{fig4}
 \end{figure}
+
+\textbf{定义4:} NDAAO的词义和语义表示: 由开始状态为$x_i$NDAAO生成的长度为$n$词语集合表示为
+\begin{equation} 
+W_{x_i}^{n}=\left\{\begin{split} &w\in \Omega^n~|~ w=\big( \lambda(x(1),...,\lambda(x(n))) \big):\\ 
+&[\exists \big(x(1),...,x(n)\big): x(1)=x_i\in X,~and\\
+&\forall\;1\leq t\leq n-1, x(t+1)\in f_{nd}(x(t))] \end{split} \right\} 
+\end{equation} 然后由词语组成的长度为$n$词组集合表示
+\begin{equation} 
+W^n(NDAAO)=\bigcup_{x_i\in X} W_{x_i}^{n} 
+\end{equation} 有了词组集合，我们可以获得NDAAO的长度为$n$语义集合表示
+\begin{equation} 
+\textbf{BEH}_{Ident}^n=\bigcup_{p=1}^n W^{p}(NDAAO) 
+\end{equation}
+
+\textbf{定义5:}辨识事件向量$\varepsilon(j)$是NDAAO中相邻两个辨识输出向量$\omega(j)$ 和 $\omega(j+1)$ 的变化量，用公式表示为 $\varepsilon=\omega(j+1)-\omega(j)$. 输入事件向量 $I(\varepsilon(j))$ 是相邻两个辨识输入向量 $I(j)$ 和 $I(j+1)$的变化量，同理输出事件向量$O(\varepsilon(j))$也有相似的定义. 具体的公式表示为:
+\begin{equation} 
+\varepsilon(j)=\bigcup_{l=1}^m \begin{cases}
+I_l\_1~or~O_l\_1,~if~ I_l(j+1)-I_l(j)=1\\
+I_l\_0~or~O_l\_0,~if~ I_l(j+1)-I_l(j)=-1\\
+\epsilon,~if~ I_l(j+1)-I_l(j)=0
+\end{cases} 
+\end{equation}
+
+考虑包含两个输入和一个输出的$I/O$向量序列$\gamma$，我们得到 \[\gamma=(A,B,C)=( \begin{bmatrix}
+0\\1\\0
+\end{bmatrix},\begin{bmatrix}
+1\\1\\0
+\end{bmatrix},\begin{bmatrix}
+1\\0\\1
+\end{bmatrix})\]
+
+该序列可以简化表示成 $A\xrightarrow{I_1\_1}B\xrightarrow{I_2\_0,O_1\_1}C\cong A\xrightarrow{I_1\_1,I_2\_0,O_1\_1}C$
+
+\subsubsection{辨识算法}
+
+本节我们提出了一个辨识算法用来生成上一节中所描述的NDAAO模型。我们定义辨识参数$ k $用于确定用于生成新状态的$I/O$向量序列的长度。如果生成的NDAAO模型的长度为$ k $的语义集合正好与观测时采样数据产生的长度为$k$的语义集合一致的话，这样的NDAAO模型被称为$ k $完全可观测的。
+
+NDAAO的构造主要分为三个步骤。首先，我们将观察到的序列转换为一组长度为$ k $的词组序列并在每组的第一个状态前创建一组长度为$ k-1 $ 伪状态以确保与其他词语一致。算法1的第一部分表示了观测序列的转换过程。然后我们开始执行NDAAO辨识操作， 将NDAAO的状态集与长度为$ k $的词组集相关联，并且转移函数由长度为$ k+1 $的词语表示。算法1的第二部分表示了NDAAO的辨识过程​​。最后，我们合并等效状态来对状态空间进行降维，对于任意两个不同的状态$ x_i $和$ x_j $，如果它们相关联的输出相同并且它们具有相同的后继状态集，则我们可以将这两个状态合并到一个状态。我们通过从NDAAO的状态集和转移函数绘制状态转移图来使模型可视化。具体过程如算法1的第三部分所示。
+
+\renewcommand{\algorithmicrequire}{\textbf{输入:}}
+\renewcommand{\algorithmicensure}{\textbf{输出:}}
+\begin{algorithm}[h]
+  \caption{Construction of the NDAAO}
+  \begin{algorithmic}[1]
+    \REQUIRE %算法的输入参数：Input  
+    观测的$I/O$序列（采样数据） $\varSigma$ 和辨识参数 $k$ \\  
+    
+    \ENSURE %算法的输出：Output  
+    NDAAO模型和状态转移图 $G=(V,E)$;  \\
+    // \textbf{第一部分:}观测序列的转换过程
+    \FOR{each $\gamma_i \in \varSigma$}
+      \IF {$u_i(1)\neq u_i(|\gamma_i|)$}
+          \STATE  从$\varSigma$删除$\gamma_i$;\
+          \STATE Return;\
+        \ELSE
+        \STATE $\alpha_i(t)=\begin{cases}
+        u_i(1),\quad for ~~ 1\leq t\leq k-1\\
+        u_i(t-k+1),\quad for ~~ k \leq t \leq k+|\gamma_i|-1
+        \end{cases}$\
+        \FOR {$m=1~~to~~|\gamma_i|$}
+        \STATE $w_i(m)=(\alpha_i(m),...,\alpha_i(m+k-1))$;
+        \ENDFOR
+        \STATE $\gamma_i^k=(w_i(1),...,w_i(|\gamma_i|))$;
+        \ENDIF
+    \ENDFOR
+    \STATE $\varSigma^k=\bigcup\limits_{i=1}^{|\varSigma|}  \gamma_i^k$;\\
+    // \textbf{第二部分:}NDAAO的辨识过程​​
+    \STATE 初始化状态集 $X=\emptyset$, 转移函数 $f_{nd}(x_0)=\emptyset$, 输出 $\Omega=\emptyset$, 初值状态 $x_0=\varSigma^k[0][0]$, 节点集 $N=\emptyset$ 和边集 $E=\emptyset$;
+    \FORALL {$\xi$ such that $\xi \in \varSigma^k$} 
+      \FORALL {$\eta$ such that $\eta \in \xi$}
+      \STATE $X\leftarrow X\cup \xi$; 
+      \STATE $\Omega \leftarrow\ \Omega \cup \eta(|\eta|)$;
+      \ENDFOR
+    \ENDFOR
+    \FORALL {$\delta$ such that $\delta \in \varSigma^{k+1}$} 
+      \FORALL {$\psi$ such that $\psi \in \delta$}
+      \STATE $x \leftarrow \psi[1-k]$;
+      \STATE $f_{nd}(x)=\psi[k-|\psi|]$;  
+      \ENDFOR
+    \ENDFOR\\
+    //\textbf{第三部分:}状态空间降维和图形化表示
+    \FORALL {$x_i,x_j$ such that $x_i,x_j \in X and i\neq j$} 
+      \IF {$\lambda(x_i)=\lambda(x_j)$ 和 $f_{nd}(x_i)=f_{nd}(x_j)$}
+        \STATE 合并 $x_i$ 和 $x_j$, 从$X$中删除 $x_i(x_j)$ 并且用$f_{nd}(x_{pre})=x_j(x_i)$替换$f_{nd}(x)=x_i(x_j)$, 这里$x_{pre}$是$x_i(x_j)$的前继;  
+      \ENDIF
+    \ENDFOR
+    \STATE $V\leftarrow\ V\cup X$; 
+    \STATE $E \leftarrow E\cup (x,f_{nd}(x))$;
+    \STATE 对$G(V,E)$画图;
+  \end{algorithmic}
+\end{algorithm}
 
 \section{实验仿真}
 \label{sec:simulation}
