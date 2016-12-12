@@ -22,7 +22,7 @@
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[scale=0.29]{threatModel1.png}
+  \includegraphics[scale=0.29]{att/threatModel1.png}
   \caption{FSI攻击威胁模型}
   \label{fig1}
 \end{figure}
@@ -31,7 +31,7 @@
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[scale=0.3]{ASC2.png}
+  \includegraphics[scale=0.3]{att/ASC2.png}
   \caption{FSI攻击构造示意图}
   \label{fig2}
 \end{figure}
@@ -39,6 +39,63 @@
 \section{系统建模和攻击构造}
 \label{sec:model}
 
+我们需要一个形式化的描述来辨识特征值为$m$的系统模型$ \textbf{BEH}_{Ident}^m $和观测信号模型\( \textbf{BEH}_{Obs}^m \)，从形式化模型定量生成特征值大于$m$特征向量。辨识的目标是使得在给定便是参数$k$的条件下特征值超出$k$的特征向量数目达到最小，理想情况是$ \textbf{BEH}_{Ident}^m $与$\textbf{BEH}_{Obs}^m $相等。最后我们在辨识得到的系统模型和观测信号模型基础上搜索FSI攻击序列。
+
+\subsection{信号采集和观测特性定义}
+
+我们通过在PLC控制器获取信号之后以固定时间间隔读取信号来采样数据\cite {roth2012}。图\ref {fig3}显示了从PLC采样$I/O$向量序列的最常用的方法，通过OPC通信模式收集在服务端接收到的$I/O$数据形成标识数据库。
+
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[scale=0.3]{att/database2.eps}
+  \caption{对PLC采样数据示意图}
+  \label{fig3}
+\end{figure}
+
+在实现数据收集之后，我们需要定义观察到的输入/输出（$I/O$）序列、采样数据的语义和词义。 首先我们引入以下定义,
+
+\textbf{定义1:} \( r \)个输入和$ s $ 个输出的采样数据的观测$I/O$序列集合定义为:
+
+\begin{equation} 
+\Sigma = (\gamma_1,...,\gamma_p) 
+\end{equation} 这里 $\gamma_i = (u_i(1),u_i(2),...,u_i(|u_i|))$, $ u_i(j) $ 是第$i$个$I/O$向量$u$的第$j$个输出，其中$ u = (I_1,...,I_r,O_1,...,O_s) = (IO_1,...IO_m) $ 且 $ m=r+s $.
+
+我们假设对于$ \forall $两个连续的$I/O$向量$ u（t）\ neq u（t + 1）$ 成立
+当且仅当至少一个$I/O$向量分量改变且$I/O$向量是新生成的。
+
+\textbf{定义2:} 观测到的采样数据词义集合表示和语义集合表示: 观测的词义可以用$I/O$序列长度为$q$的观测向量集合描述 
+\[
+L_{Obs}^q = \bigcup_{\gamma_i \in \Sigma} \Big(\bigcup_{t=1}^{|\gamma_i|-q+1} (u_i(t),u_i(t+1),...,u_i(t+q-1))\Big) 
+\]
+
+有了词义的形式化表示后，我们定义长度为$n$的采样数据的语义的表示:
+\begin{equation}
+ \textbf{BHE}_{Obs}^n = \bigcup_{i=1}^n L_{Obs}^i 
+\end{equation}
+
+\subsection{模型辨识}
+
+\subsubsection{模型选择}
+
+模型辨识的目的是确保辨识的任意长度为$ m $的语义表示$ \textbf {BEH}_{Ident}^m $等于观测到的任意长度为$ m $的语义表示  \（\ textbf {BEH} _ {Obs} ^ m \），其中$ m $可以是任何正整数。 简而言之，所辨识的模型在精度足够高的情况下能够完美复现基于PLC的过程控制系统。考虑到过程控制系统通常是可编程的控制器和物理设备的耦合系统，可编程的控制器可以被认为是确定性的，而物理设备通常被认为是非确定性的。因此，物理设备和控制器的耦合系统一定是非确定性的。因此，我们提出了适合于辨识过程控制系统的非确定性自发输出自动机（NDAAO）\cite {klein2005}。
+
+\textbf{定义3:} NDAAO是由5元组函数表示： \[ NDAAO=(X,\Omega,\textit{f}_{nd},\lambda,x_0) \] with\
+\begin{itemize}
+  \item $ X={x_0,...,x_{|x|-1}} $ 是有限状态集
+  \item $ \Omega={\omega_1,...,\omega_{|\omega|}} $ 是有限输出变量集
+  \item $ \textit{f}_{nd}: X\rightarrow 2^X $ 是非确定性转移函数
+  \item $ \lambda: X\rightarrow \Omega $ 是状态对应的输出函数
+  \item $x_0$ 是初始状态
+\end{itemize}
+
+NDAAO可以由图$G=(V,E)$的形式表示，图$G$的定点集是NDAAO所有的状态集，有向边集是由非确定性转移函数$f_{nd}$组成，即\[ E(G)=\big\{(x_i,x_j)\in X\times X: x_j\in f_{nd}(x_i)\big\} \]，每个节点对应一个状态并包含状态对应的输出，图~\ref{fig4}通过一个简单的例子来展示图形化的NDAAO模型。
+
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[scale=0.18]{ndaao_example.png}
+  \caption{NDAAO图形表示}
+  \label{fig4}
+\end{figure}
 
 \section{实验仿真}
 \label{sec:simulation}
