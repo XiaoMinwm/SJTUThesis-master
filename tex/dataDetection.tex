@@ -30,7 +30,7 @@
 
 \subsubsection {检测方法}
 
-我们在图\ref {fig28}中创建了一个两阶段检测的流程示意图，用于描述基于前一节提到的两种类型的攻击进行基于异常数据的检测过程。 一方面图\ref {fig28}显示了结合观测到的I$I/O$向量数据库和辨识的离散事件模型，我们首先对\textit {a）类攻击}（蛮力和类故障攻击）进行残差对比检测。另一方面如果相应的状态经过辨识模型映射后存在多后继的情况，我们采用\textit {b）类攻击}（隐蔽和避免故障检测的攻击）进行特定的FSI检测。最后在经过两个阶段检测之后，我们将检测结果进行分析并定位以获得攻击源的具体位置。
+我们在图\ref {fig28}中创建了一个两阶段检测的流程示意图，用于描述基于前一节提到的两种类型的攻击进行基于异常数据的检测过程。 一方面图\ref {fig28}显示了结合观测到的I$I/O$向量数据库和辨识的离散事件模型，我们首先对a）类攻击\textit {蛮力和类故障攻击}进行残差对比检测。另一方面我们需要验证当前观测的向量值映射到模型中的状态的前一状态是否存在多个后继状态，对应到状态转移图即当前对应的状态只是上一状态的某个分支其，如果是的话我们针对b）类攻击\textit {隐蔽和避免故障检测的攻击}进行特定的FSI检测。最后在经过两个阶段检测之后，我们将检测结果进行分析并定位以获得攻击源的具体位置。
 
 \begin{figure}[!htb]
 		\centering
@@ -38,6 +38,59 @@
 		\caption{基于异常数据检测的流程示意图}
 		\label{fig28}
 	\end{figure}
+
+考虑到我们的主要检测目标是能够改变控制系统的逻辑或进程的错误序列注入攻击，由于FSI攻击来自辨识的模型的相同输出确保其不会被故障机制直接检测，而且通过选择具有恶意执行逻辑的适当长度的错误序列注入到控制器的输入信号中来破坏系统。算法\ref{algo:abd}显示了基于异常数据的检测过程。第一步是通过类似构造攻击模型辨识过程来获得待检测系统NDAAO模型，然后根据残差计算每个当前观测的$I/O$向量值与模型的预期输出是否一致。如果不一致则认为在当前模型的状态估计集为空即不存在任何可行的下个状态，此时很可能遭受\textit{蛮力和类故障攻击}，否则我们需要检查先前状态估计集模$|\hat{X}_{t-1}|$的大小是否大于1，如果是的话可能存在错误序列注入攻击并进行第二阶段FSI攻击的检测。
+
+由上章节中FSI序列的定义式（2-7）中长度为$n$的序列$s$满足的必要条件是$s\notin L_{Obs}^n$，所以我们需要增加记录每一观测向量值并判断从观测周期初始向量到当前观测向量组成的观测序列$\phi$是否存在与原始用来辨识模型的采样序列库中，如果不存在的话则可以判断系统受到FSI攻击。为了使检测更加有效，我们只保留每次检测时序列满足$ \varphi$属于$\gamma'$任意子字符串的$\gamma'$并将$\gamma'$保存于$\varSigma'$，主要目的是删除没有用到的验证序列集并保留有效的序列以验证观测序列$\phi$是否属于采样序列库的子串。 此外介于相邻两个多后继状态之间的序列是唯一的，我们仅仅判断$ \varphi $和$ \gamma $的多后继映射向量（包括当前向量）序列更快地进行验证。 最后判断当前估计状态集$|\hat{X}_{t}|$是否是否等于1，如果不是的话我们把控制系统视为受到\textit {隐蔽和避免故障检测的攻击}，否则控制系统将安全地通过检测即没有受到任何攻击。
+
+\begin{algorithm}[h]
+		\caption{基于异常数据的检测算法}
+		\label{algo:abd}
+		\begin{algorithmic}[1]
+			\Require %算法的输入参数：Input  
+			辨识的NDAAO模型, 新观测的$I/O$向量$\varphi(t)$, 模型的状态估计$|\hat{X}_{t-1}|$, 和用于模型辨识的采样序列库$\varSigma$ \\  
+			\Ensure %算法的输出：Output  
+			是否通过检测，如果没有的话系统可能受到的攻击类型并给出系统受攻击的路径和传感器位置$locatePair$。 \\
+			\If {$|$\^{X}$_{t-1}$$| > 0$}
+			\State \^{X}$_{t}$ $\leftarrow \{x\in X|\exists x_{pre}\in$ \^{X}$_{t-1}$$:x\in f(x_{pre}) \wedge IO(\lambda(x_{pre}),\lambda(x))=IO(\lambda(x_{pre}),\varphi(t))\}$
+			\If {$|\hat{X}_t|=0$}
+			\State $locatePair\leftarrow locatePair((\varphi_{init},...,\varphi(t)),IO(\lambda(x_{pre})\cup IO(\lambda(x_{pre}),\varphi(t)))$
+			\State \textbf{return} \textit{蛮力和类故障攻击}
+			\EndIf
+			\If {$deg(\hat{X}_{t-1})>1$}
+			\State $\phi \leftarrow (\varphi_{init},...,\varphi(t))$
+			\For {each $\gamma \in \varSigma$}
+			\State 保留满足 $\varphi 属于\gamma'$子串的$\gamma'$ 并且 $\varSigma' \leftarrow \gamma'$
+			\State $\phi_{ms} \leftarrow$ 保留对应到模型中的多后继向量（包括当前向量）的 $\phi$的序列
+			\State $\gamma_{ms} \leftarrow$ 保留对应到模型中的多后继向量（包括当前向量）的 $\gamma$的序列
+			\State $\phi\leftarrow \phi_{ms}, \gamma\leftarrow \gamma_{ms}$
+			\If {$\phi \notin substring(\gamma)$}
+			\State $\hat{X}_t \leftarrow \emptyset$
+			\State break
+			\EndIf
+			\EndFor
+			$\varSigma \leftarrow \varSigma'$
+			\EndIf
+			\Else
+			\State $\hat{X}_t \leftarrow \{x\in X|\lambda(x)=\varphi(t)\}$
+			\EndIf
+			$\hat{X}_{t-1}\leftarrow \hat{X}_t$
+			\If {$|\hat{X}_t|=1$}
+			\State \textbf{return} \textit{安全通过检测}
+			\Else
+			\State $locatePair\leftarrow locatePair(\phi,IO(\lambda(x_{pre})\cup
+			IO(\lambda(x_{pre}),\varphi(t)))$
+			\State \textbf{return} \textit{隐蔽和避免故障检测的攻击}
+			\EndIf
+		\end{algorithmic}
+	\end{algorithm}
+
+
+
+
+
+
+
 
 \begin {table}[!htb]
 \caption {ds1006的技术细节}
