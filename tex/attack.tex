@@ -13,6 +13,7 @@
 \label{sec:intro}
 
 过程控制系统作为国家关键基础设施的基本组成部分已经广泛应用于工业和物联网系统中。正因为它们在现代工业社会中的关键作用，使得它们成为怀有恶意目的的攻击者的感染和侵袭的目标。传统的安全保护主要是通过多层网络防火墙和成熟的的病毒防御软件阻止网络攻击入侵工业网络。然而考虑到网络和复杂的硬件系统实施，这些方法不能完全保护网络和硬件平台免受不断变异的威胁侵入，例如Stuxnet病毒侵入人机界面（HMI）服务器并上传恶意代码到可编程逻辑控制器PLC使其损坏制造核原料的离心机。考虑到HMI服务器通常安放在在受良好保护的工业控制网络中，所以对其实施攻击是非常困难的。
+
 本章我们提出的错误序列注入(FSI)攻击，可以通过感染和篡改PLC的输入信号迫使其执行误操作和破坏控制系统的关键设备。因为PLC的输入仅仅来自假设被FSI攻击注入的远程传感器，所以在不需要渗透到防御坚固的控制网络并执行恶意代码上传的情况下便可以对系统实施有目的性攻击。值得注意的是我们构造的攻击可以避开现有的系统故障检测机制，并利用其容错率漏洞来构造基于离散时间模型的FSI攻击。
 
 \section{攻击模型概述}
@@ -133,62 +134,60 @@ I_l\_0~or~O_l\_0,~if~ I_l(j+1)-I_l(j)=-1\\
 
 本节我们提出了一个辨识算法用来生成上一节中所描述的NDAAO模型。我们定义辨识参数$ k $用于确定用于生成新状态的$I/O$向量序列的长度。如果生成的NDAAO模型的长度为$ k $的语义集合正好与观测时采样数据产生的长度为$k$的语义集合一致的话，这样的NDAAO模型被称为$ k $完全可观测的。
 
-NDAAO的构造主要分为三个步骤。首先，我们将观察到的序列转换为一组长度为$ k $的词组序列并在每组的第一个状态前创建一组长度为$ k-1 $ 伪状态以确保与其他词语一致。算法1的第一部分表示了观测序列的转换过程。然后我们开始执行NDAAO辨识操作， 将NDAAO的状态集与长度为$ k $的词组集相关联，并且转移函数由长度为$ k+1 $的词语表示。算法\ref{algo:ndaao}的第二部分表示了NDAAO的辨识过程​​。最后，我们合并等效状态来对状态空间进行降维，对于任意两个不同的状态$ x_i $和$ x_j $，如果它们相关联的输出相同并且它们具有相同的后继状态集，则我们可以将这两个状态合并到一个状态。我们通过从NDAAO的状态集和转移函数绘制状态转移图来使模型可视化。具体过程如算法\ref{algo:ndaao}的第三部分所示。
+NDAAO的构造主要分为三个步骤。首先，我们将观察到的序列转换为一组长度为$ k $的词组序列并在每组的第一个状态前创建一组长度为$ k-1 $ 伪状态以确保与其他词语一致。算法1的第一部分表示了观测序列的转换过程。然后我们开始执行NDAAO辨识操作， 将NDAAO的状态集与长度为$ k $的词组集相关联，并且转移函数由长度为$ k+1 $的词语表示。算法\ref{algo:ndaao}的第二部分表示了NDAAO的辨识过程​​。最后，我们合并等效状态来对状态空间进行降维，对于任意两个不同的状态$ x_i $和$ x_j $，如果它们相关联的输出相同并且它们具有相同的后继状态集，则我们可以将这两个状态合并到一个状态。我们通过从NDAAO的状态集和转移函数绘制状态转移图来使模型可视化。具体过程如算法\ref{algo:graph}所示。
 
-\renewcommand{\algorithmicrequire}{\textbf{输入:}}
-\renewcommand{\algorithmicensure}{\textbf{输出:}}
 \begin{algorithm}[h]
   \caption{NDAAO构造算法}
   \label{algo:ndaao}
   \begin{algorithmic}[1]
-    \REQUIRE %算法的输入参数：Input  
-    观测的$I/O$序列（采样数据） $\varSigma$ 和辨识参数 $k$ \\  
-    
-    \ENSURE %算法的输出：Output  
+    \Require %算法的输入参数：Input
+    观测的$I/O$序列（采样数据） $\varSigma$ 和辨识参数 $k$
+    \Ensure %算法的输出：Output
     NDAAO模型和状态转移图 $G=(V,E)$;  \\
-    // \textbf{第一部分:}观测序列的转换过程
-    \FOR{each $\gamma_i \in \varSigma$}
-      \IF {$u_i(1)\neq u_i(|\gamma_i|)$}
-          \STATE  从$\varSigma$删除$\gamma_i$;\
-          \STATE Return;\
-        \ELSE
-        \STATE $\alpha_i(t)=\begin{cases}
+    // \textbf{第一部分:观测序列的转换过程}
+    \For{each $\gamma_i \in \varSigma$}
+      \If {$u_i(1)\neq u_i(|\gamma_i|)$}
+          \State  从$\varSigma$删除$\gamma_i$; Return;\
+        \Else
+        \State $\alpha_i(t)=\begin{cases}
         u_i(1),\quad for ~~ 1\leq t\leq k-1\\
         u_i(t-k+1),\quad for ~~ k \leq t \leq k+|\gamma_i|-1
         \end{cases}$\
-        \FOR {$m=1~~to~~|\gamma_i|$}
-        \STATE $w_i(m)=(\alpha_i(m),...,\alpha_i(m+k-1))$;
-        \ENDFOR
-        \STATE $\gamma_i^k=(w_i(1),...,w_i(|\gamma_i|))$;
-        \ENDIF
-    \ENDFOR
-    \STATE $\varSigma^k=\bigcup\limits_{i=1}^{|\varSigma|}  \gamma_i^k$;\\
-    // \textbf{第二部分:}NDAAO的辨识过程​​
-    \STATE 初始化状态集 $X=\emptyset$, 转移函数 $f_{nd}(x_0)=\emptyset$, 输出 $\Omega=\emptyset$, 初值状态 $x_0=\varSigma^k[0][0]$, 节点集 $N=\emptyset$ 和边集 $E=\emptyset$;
-    \FORALL {$\xi$ such that $\xi \in \varSigma^k$} 
-      \FORALL {$\eta$ such that $\eta \in \xi$}
-      \STATE $X\leftarrow X\cup \xi$; 
-      \STATE $\Omega \leftarrow\ \Omega \cup \eta(|\eta|)$;
-      \ENDFOR
-    \ENDFOR
-    \FORALL {$\delta$ such that $\delta \in \varSigma^{k+1}$} 
-      \FORALL {$\psi$ such that $\psi \in \delta$}
-      \STATE $x \leftarrow \psi[1-k]$;
-      \STATE $f_{nd}(x)=\psi[k-|\psi|]$;  
-      \ENDFOR
-    \ENDFOR\\
-    //\textbf{第三部分:}状态空间降维和图形化表示
-    \FORALL {$x_i,x_j$ such that $x_i,x_j \in X and i\neq j$} 
-      \IF {$\lambda(x_i)=\lambda(x_j)$ 和 $f_{nd}(x_i)=f_{nd}(x_j)$}
-        \STATE 合并 $x_i$ 和 $x_j$, 从$X$中删除 $x_i(x_j)$ 并且用$f_{nd}(x_{pre})=x_j(x_i)$替换$f_{nd}(x)=x_i(x_j)$, 这里$x_{pre}$是$x_i(x_j)$的前继;  
-      \ENDIF
-    \ENDFOR
-    \STATE $V\leftarrow\ V\cup X$; 
-    \STATE $E \leftarrow E\cup (x,f_{nd}(x))$;
-    \STATE 对$G(V,E)$画图;
+        \For {$m=1~~to~~|\gamma_i|$}
+        \State $w_i(m)=(\alpha_i(m),...,\alpha_i(m+k-1))$;
+        \EndFor
+        \State $\gamma_i^k=(w_i(1),...,w_i(|\gamma_i|))$;
+        \EndIf
+    \EndFor
+    \State $\varSigma^k=\bigcup\limits_{i=1}^{|\varSigma|}  \gamma_i^k$;\\
+    \State \textbf{第二部分:NDAAO的辨识过程​​}初始化状态集 $X=\emptyset$, 转移函数 $f_{nd}(x_0)=\emptyset$, 输出 $\Omega=\emptyset$, 初值状态 $x_0=\varSigma^k[0][0]$, 节点集 $N=\emptyset$ 和边集 $E=\emptyset$;
+    \ForAll {$\xi$ such that $\xi \in \varSigma^k$} 
+      \ForAll {$\eta$ such that $\eta \in \xi$}
+      \State $X\leftarrow X\cup \xi$; $\Omega \leftarrow\ \Omega \cup \eta(|\eta|)$;
+      \EndFor
+    \EndFor
+    \ForAll {$\delta$ such that $\delta \in \varSigma^{k+1}$} 
+      \ForAll {$\psi$ such that $\psi \in \delta$}
+      \State $x \leftarrow \psi[1-k]$;$f_{nd}(x)=\psi[k-|\psi|]$;  
+      \EndFor
+    \EndFor
   \end{algorithmic}
 \end{algorithm}
 
+\begin{algorithm}[h]
+  \caption{状态空间降维和图形化表示}
+  \label{algo:graph}
+   \begin{algorithmic}[1]
+\ForAll {$x_i,x_j$ such that $x_i,x_j \in X and i\neq j$}
+      \If {$\lambda(x_i)=\lambda(x_j)$ 和 $f_{nd}(x_i)=f_{nd}(x_j)$}
+        \State 合并 $x_i$ 和 $x_j$, 从$X$中删除 $x_i(x_j)$ 并且用$f_{nd}(x_{pre})=x_j(x_i)$替换$f_{nd}(x)=x_i(x_j)$, 这里$x_{pre}$是$x_i(x_j)$的前继;  
+      \EndIf
+    \EndFor
+    \State $V\leftarrow\ V\cup X$;
+    \State $E \leftarrow E\cup (x,f_{nd}(x))$;
+    \State 对$G(V,E)$画图;
+  \end{algorithmic}
+\end{algorithm}
 \textbf{例子1.} 考虑从无故障例子系统中采样三组向量序列: $\gamma_1=(A,B,C,D,E,A)$, $\gamma_2=(A,B,D,C,D,E,A)$, $\gamma_3=(A,D,B,C,D,F,E,A)$. 大写字母代表不同的$I/O$向量。这里我们选取辨识参数$k=2$，经过序列转换后我们得到 \[\begin{split} \gamma_1^{k=2}&=(AA,AB,BC,CD,DE,EA)\\ \gamma_2^{k=2}&=(AA,AB,BD,DC,CD,DE,EA)\\\gamma_3^{k=2}&=(AA,AD,DB,BC,CD,DF,FE,EA) \end{split}\] 和 \[\begin{split} \gamma_1^{k=3}&=(AAA,AAB,ABC,BCD,CDE,DEA)\\ \gamma_2^{k=3}&=(AAA,AAB,ABD,BDC,DCD,CDE,DEA)\\\gamma_3^{k=3}&=(AAA,AAD,ADB,DBC,BCD,CDF,\\&\quad \ DFE,FEA) \end{split}\]
 
 在获得$\Sigma^{k=2}$ 和 $\Sigma^{k=3}$之后，我们从$\Sigma^{k=2}$得到状态集并且通过算法\ref{algo:ndaao}的第二部分从$\Sigma^{k=3}$得到转移函数。相应的例子示意如图~\ref{fig5}所示。
@@ -232,27 +231,26 @@ A^k=\bigcup_{x_i\in X} \big( \bigcup_{n=k+2}^{max(|\gamma_d|)} (S_{x_i}^{n})\big
 A^k=\bigcup_{x_{init}\in X} \big(S_{x_{init}}\big) 
 \end{equation}
 
-\renewcommand{\algorithmicrequire}{\textbf{输入:}}
-\renewcommand{\algorithmicensure}{\textbf{输出:}}
+
 \begin{algorithm}[h]
   \caption{FSI递归遍历算法}
   \label{algo:fsi}
   \begin{algorithmic}[1]
-    \REQUIRE %算法的输入参数：Input  
+    \Require %算法的输入参数：Input  
     辨识的NDAAO模型, 观测的$I/O$序列 $\varSigma$, 辨识参数 $k$ 和初始状态 $x_{init}$ \\  
     
-    \ENSURE %算法的输出：Output  
+    \Ensure %算法的输出：Output  
     错误序列集合 $S_{x_{init}}$;  \\
-    \FOR{each $x \in x_{init}$}
-      \STATE $x_{init}=f_{nd}(x)$
-      \STATE $seq$.append$(x)$
-      \STATE $IncSearching(NDAAO,\varSigma,k,x_{init})$
-      \IF {$|seq|\geq (k+2)$ and $ seq\notin substring(\gamma) ~for~\forall\gamma\in\varSigma$}
-        \STATE $S_{x_{init}}$.append$(seq)$
-      \ENDIF
-      \STATE $seq$.pop()
-    \ENDFOR
-    \STATE Return $S_{x_{init}}$
+    \For{each $x \in x_{init}$}
+      \State $x_{init}=f_{nd}(x)$
+      \State $seq$.append$(x)$
+      \State $IncSearching(NDAAO,\varSigma,k,x_{init})$
+      \If {$|seq|\geq (k+2)$ and $ seq\notin substring(\gamma) ~for~\forall\gamma\in\varSigma$}
+        \State $S_{x_{init}}$.append$(seq)$
+      \EndIf
+      \State $seq$.pop()
+    \EndFor
+    \State Return $S_{x_{init}}$
   \end{algorithmic}
 \end{algorithm}
 
@@ -281,14 +279,14 @@ C_s= \dfrac{\sum_{x_i\in X} (deg(x_i))}{|X|}
 为了证明所提出的错误序列攻击方法的可行性和性能，我们给出了相应的案例仿真。 考虑的系统是一个小型的货物分拣系统，该系统的功能是根据尺寸大小分拣包裹。系统有11个输入（来自物理设备的输出信号）和5个输出（从PLC输入到物理设备的信号）。 图\ref{fig7}显示了货物分拣系统的结构示图。
 \begin{figure}[!htb]
   \centering
-  \includegraphics[scale=0.48]{sort.png}
+  \includegraphics[scale=0.48]{att/sort.png}
   \caption{货物分拣系统的结构示图}
   \label{fig7}
 \end{figure}
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[scale=0.31]{casendaao.png}
+  \includegraphics[scale=0.31]{att/casendaao.png}
   \caption{货物分拣系统的部分NDAAO模型}
   \label{fig8}
 \end{figure}
@@ -297,14 +295,14 @@ C_s= \dfrac{\sum_{x_i\in X} (deg(x_i))}{|X|}
 辨识数据库是由50个采样的系统运行周期组成并且每个周期的采样时间均为货物到来和分拣时刻。系统的输入和输出变量向量为$[A+,A-,B,C,D,k_1,k_2,a_0,a_1,a_2,b_0,b_1,c_0,c_1,d_0,d_1]$。在完成辨识过程和状态空间降维后，我们得到货物分拣系统完整的NDAAO模型，由于篇幅所限部分模型如图\ref{fig8}所示。
 \begin{figure}[!htb]
   \centering
-  \includegraphics[scale=0.29]{length.png}
+  \includegraphics[scale=0.29]{att/length.png}
   \caption{不同数量的错误序列数量}
   \label{fig9}
 \end{figure}
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[scale=0.39]{vuln.png}
+  \includegraphics[scale=0.39]{att/vuln.png}
   \caption{$C_s$ 的 $C_A^n$关系}
   \label{fig10}
 \end{figure}
