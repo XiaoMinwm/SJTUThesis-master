@@ -24,11 +24,11 @@
 \section{系统建模和入侵检测设计}
 \label{sec:matheq}
 
-\subsubsection {攻击类型}
+\subsection {攻击类型}
 
 对于异常数据注入攻击，主要存在两种类型。一类是\textit {蛮力和类故障攻击}，例如由Mclaughlin等人提出的拥有控制意识的FDI攻击\parencite{mclaughlinS2014}和由Pang等人设计的伪装假数据攻击\parencite{pang2015}。 然而这类攻击是实现具体的任务和目标是销毁受控系统，但是没有考虑受感染系统本身的安全机制，所以很容易被成熟的故障检测机制检测到\parencite{roth2012，garcia2012}。另一类是\textit {隐蔽和避免故障检测的攻击}，这类攻击的典型代表就是我们前一章节构造的错误序列注入攻击。这种类型的攻击要求攻击者熟悉的受感染系统的物理变量与控制器连接配置信息并能够访问传感器，因此它可以避开系统故障检测。
 
-\subsubsection {检测方法}
+\subsection {检测方法}
 
 我们在图\ref {fig28}中创建了一个两阶段检测的流程示意图，用于描述基于前一节提到的两种类型的攻击进行基于异常数据的检测过程。 一方面图\ref {fig28}显示了结合观测到的I$I/O$向量数据库和辨识的离散事件模型，我们首先对a）类攻击\textit {蛮力和类故障攻击}进行残差对比检测。另一方面我们需要验证当前观测的向量值映射到模型中的状态的前一状态是否存在多个后继状态，对应到状态转移图即当前对应的状态只是上一状态的某个分支其，如果是的话我们针对b）类攻击\textit {隐蔽和避免故障检测的攻击}进行特定的FSI检测。最后在经过两个阶段检测之后，我们将检测结果进行分析并定位以获得攻击源的具体位置。
 
@@ -85,17 +85,25 @@
 		\end{algorithmic}
 	\end{algorithm}
 
+对于攻击定位，一旦存在任何攻击我们需要分析并存储相关的受攻击路径和传感器。 值得注意的是，我们可以通过比较采样的序列库和保存的受攻击路径（序列）来定位具体哪个部分受到攻击。 为了实现更好的定位精度，我们还需要保存表示当前观测向量和前一个向量之间的驱动事件向量分量，例如温控设备开关和温度信号等物理变量。此外相应的采样序列的驱动事件变量分量应该被记录以定位所有可能的感染的传感器。
 
+\section{实验仿真}
+\label{sec:insertimage}
 
+To prove the performance of the proposed method for anomaly-based Detection, another case study is presented. The simulated system is a temperature control system whose function is to satisfy requirement of the temperature and allocate the busy time peak power to the non-busy time with 5 subsystems. The system has 10 inputs (measurements from the system) and 5 outputs (signals from PLC to the actuators). Fig.~\ref{fig13} shows the brief structure of the temperature control system. Fig.~\ref{fig14} presents the simulink layout of the temperature control system.
+为了证明所提出的基于异常数据的检测方法的性能，我们给出了基于Dspace实时仿真平台的攻击检测验证实验。DSPACE实时仿真系统由德国dSPACE公司开发，基于MATLAB/Simulink控制系统开发及硬件和软件仿真硬件和软件工作平台，与MATLAB/Simulink/RTW完全无缝连接。DSPACE实时系统具有强大的实时性，高可靠性，良好的可扩展性等特点。DSPACE硬件系统具有高速计算能力，并配有丰富的I/O支持，用户可根据需要进行组合;软件环境，功能强大且易于使用，包括自动代码生成/下载和测试/调试的工具集。DSPACE硬件和软件现在已成为快速原型设计和实时平台的硬件在环仿真的首选。图\ref{fig112}展示了Dspace图片且Dspace详细的技术规则如表\ref{algo:dspace}所示。
 
+	\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=0.26]{dataD/dspace.jpg}
+		\caption{Dspace图片}
+		\label{fig112}
+	\end{figure}
 
-
-
-
-\begin {table}[!htb]
-\caption {ds1006的技术细节}
+\begin{table}[!htb]
+\caption {ds1006的技术规则}
+\label{algo:dspace}
 \begin{tabular} {|p{4cm}|p{10cm}|} \hline \hline
-
   参数&规格\\ \hline
   处理器&四核AMD皓龙处理器2.8 GHz，4 x 64 kB L1数据高速缓存，4 x 64 kB L1指令高速缓存，4 x 512 kB L2高速缓存，6 MB L3高速缓存\\ \hline
   定时器&每个内核：3个通用定时器，多处理器系统的同步时基单元（STBU）\\ \hline
@@ -112,14 +120,88 @@
   物理特性&0-40°C（32-104°F）（环境温度）\\ \hline
   物理特性&主动冷却（风扇）（冷却）\\ \hline
   物理特性&（电源）ISA总线：+5 V±5％2.0 A（无DS911），+5 V±5％3.0 A（DS911至模块版本2.0），+12 V±5％连接器：+5 V±5％20 A. \\ \hline
-
-
   内存&1 GB DDR2-800 SDRAM本地内存，用于应用程序和动态应用程序数据，4 x 128 MB DDR2-267 SDRAM全局内存，用于主机数据交换\\ \hline\hline
 \end{tabular}
 \end{table}
 
-\section{实验仿真}
-\label{sec:insertimage}
+仿真的系统是一个温度控制系统，其功能是满足温度要求，并将繁忙时间峰值功率分配给5个子系统的非繁忙时间。 系统有10个输入（来自系统的测量值）和5个输出（来自控制器到执行器的信号）。图\ref{fig113}显示了温度控制系统的简要结构。图\ref {fig114}介绍了温度控制系统的结构示意图。
+	
+	\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=0.26]{dataD/Temperature.png}
+		\caption{Temperature control system}
+		\label{fig113}
+	\end{figure}
+	
+	\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=0.04]{dataD/simulink_attack.bmp}
+		\caption{simulink layout of the system}
+		\label{fig114}
+	\end{figure}
+	
+	Firstly, we implement \textit{brute-force \& fault-like attack}. We just make random data injection or sequence on the temperature sensors of the system. We execute two kinds of detection:fault-detection and anomaly-based detection. From the result, we obtain that both detection can work perfect. Fig.~\ref{fig15} and Fig.~\ref{fig16} show the detection result of the attack.
+	首先，我们对控制系统实行蛮力和类故障攻击，在系统控制器的输入端和温度传感器采集信号端之间我们注入随机的数据或者数据序列。然后我们对其进行两种不同的检测机制：故障检测和基于异常数据的入侵检测机制。从最后的检测结果来看，两种检测都能很好的完成攻击的检测和报警，图\ref{fig115}和图\ref{fig116}分别展示了检测结果。
+	
+	\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=0.26]{dataD/normalFaultDetection.png}
+		\caption{Fault detection for brute-force \& fault-like attack}
+		\label{fig115}
+	\end{figure}
+	
+	\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=0.26]{dataD/normalAnomalyDetection.png}
+		\caption{Anomaly-based detection for brute-force \& fault-like attack}
+		\label{fig116}
+	\end{figure}
+	
+	For the first type of attack, two detection both do the same algorithm to check new observed signal vector according to the expected output. Once any attack is detected, we will take care those comprised sensors, in 
+	Fig.~\ref{fig17} those are $Ta3,s3,s4$ and $Tb1,s1,,s2,s3,s4,s5$ to correct monitoring value in the legal scope. The red octagon is represent state, which suffer from \textit{brute-force \& fault-like attack}.
+	
+	\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=0.24]{dataD/graphForFault-detection.png}
+		\caption{The state transfer graph for brute-force \& fault-like attack}
+		\label{fig17}
+	\end{figure}
+	
+	Secondly, we implement \textit{disguised \& fault-detection-free attack}. We make specific false sequence injection on the temperature sensors, for instance, we take sequence of $Q0Q81Q82Q84Q85Q86Q96Q88
+	$ generated from False Sequence Attack Algorithm. $Q*$ stands for binary output vector, such as:\[\begin{split}
+	&Q0\Leftrightarrow 010101010100000\\
+	&Q81\Leftrightarrow 010101010100111
+	\end{split}
+	\]  We execute two kinds of detection:fault-detection and anomaly-based detection as well. From the result, we obtain that fault detection can not work and our anomaly-based detection work well. Fig.~\ref{fig18} and Fig.~\ref{fig19} show the detection result of the attack.
+	
+		\begin{figure}[!htb]
+			\centering
+			\includegraphics[scale=0.27]{dataD/anomalyFaultDetection.png}
+			\caption{Fault detection for disguised \& fault-detection-free attack}
+			\label{fig18}
+		\end{figure}
+		
+		\begin{figure}[!htb]
+			\centering
+			\includegraphics[scale=0.18]{dataD/anomalyAnomalyDetection.png}
+			\caption{Anomaly-based detection for disguised \& fault-detection-free attack}
+			\label{fig19}
+		\end{figure}
+	
+	For the second type of attack, anomaly-based detection not only checks new observed signal vector according to the expected output but also verifies whether history observed sequences conforming to substring of collected sequences. Once false sequence attack is detected, we also need to  those deal with comprised sensors, in 
+	Fig.~\ref{fig20} those are $Tb3,s1,s2,s3,s5$ and $Ta1,Tb5$ to correct monitoring value in the legal scope. The red octagon is represent state, which suffer from \textit{disguised \& fault-detection-free attack}.
+	
+	\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=0.25]{dataD/graphAnomalyDetection.png}
+		\caption{The state transfer graph for disguised \& fault-detection-free attack}
+		\label{fig20}
+	\end{figure}
+
+
+
+
+
 
 \section{本章小结}
 \label{sec:insertimage}
