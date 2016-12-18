@@ -34,7 +34,7 @@
 
 \begin{figure}[!htb]
 		\centering
-		\includegraphics[scale=0.35]{dataD/flow-chart.png}
+		\includegraphics[scale=0.49]{dataD/flow-chart.png}
 		\caption{基于异常数据检测的流程示意图}
 		\label{fig28}
 	\end{figure}
@@ -47,10 +47,10 @@
 		\caption{基于异常数据的检测算法}
 		\label{algo:abd}
 		\begin{algorithmic}[1]
-			\Require %算法的输入参数：Input  
-			辨识的NDAAO模型, 新观测的$I/O$向量$\varphi(t)$, 模型的状态估计$|\hat{X}_{t-1}|$, 和用于模型辨识的采样序列库$\varSigma$ \\  
-			\Ensure %算法的输出：Output  
-			是否通过检测，如果没有的话系统可能受到的攻击类型并给出系统受攻击的路径和传感器位置$locatePair$。 \\
+			\Require %算法的输入参数：Input
+			辨识的NDAAO模型, 新观测的$I/O$向量$\varphi(t)$, 模型的状态估计$|\hat{X}_{t-1}|$, 和采样序列库$\varSigma$
+			\Ensure %算法的输出：Output
+			是否通过检测，如果没有的话系统可能受到的攻击类型并给出受攻击的路径和位置$locatePair$。
 			\If {$|$\^{X}$_{t-1}$$| > 0$}
 			\State \^{X}$_{t}$ $\leftarrow \{x\in X|\exists x_{pre}\in$ \^{X}$_{t-1}$$:x\in f(x_{pre}) \wedge IO(\lambda(x_{pre}),\lambda(x))=IO(\lambda(x_{pre}),\varphi(t))\}$
 			\If {$|\hat{X}_t|=0$}
@@ -65,8 +65,7 @@
 			\State $\gamma_{ms} \leftarrow$ 保留对应到模型中的多后继向量（包括当前向量）的 $\gamma$的序列
 			\State $\phi\leftarrow \phi_{ms}, \gamma\leftarrow \gamma_{ms}$
 			\If {$\phi \notin substring(\gamma)$}
-			\State $\hat{X}_t \leftarrow \emptyset$
-			\State break
+			\State $\hat{X}_t \leftarrow \emptyset$;\State break
 			\EndIf
 			\EndFor
 			$\varSigma \leftarrow \varSigma'$
@@ -90,18 +89,18 @@
 \section{实验仿真}
 \label{sec:insertimage}
 
-To prove the performance of the proposed method for anomaly-based Detection, another case study is presented. The simulated system is a temperature control system whose function is to satisfy requirement of the temperature and allocate the busy time peak power to the non-busy time with 5 subsystems. The system has 10 inputs (measurements from the system) and 5 outputs (signals from PLC to the actuators). Fig.~\ref{fig13} shows the brief structure of the temperature control system. Fig.~\ref{fig14} presents the simulink layout of the temperature control system.
+
 为了证明所提出的基于异常数据的检测方法的性能，我们给出了基于Dspace实时仿真平台的攻击检测验证实验。DSPACE实时仿真系统由德国dSPACE公司开发，基于MATLAB/Simulink控制系统开发及硬件和软件仿真硬件和软件工作平台，与MATLAB/Simulink/RTW完全无缝连接。DSPACE实时系统具有强大的实时性，高可靠性，良好的可扩展性等特点。DSPACE硬件系统具有高速计算能力，并配有丰富的I/O支持，用户可根据需要进行组合;软件环境，功能强大且易于使用，包括自动代码生成/下载和测试/调试的工具集。DSPACE硬件和软件现在已成为快速原型设计和实时平台的硬件在环仿真的首选。图\ref{fig112}展示了Dspace图片且Dspace详细的技术规则如表\ref{algo:dspace}所示。
 
 	\begin{figure}[!htb]
 		\centering
-		\includegraphics[scale=0.26]{dataD/dspace.jpg}
+		\includegraphics[scale=0.59]{dataD/dspace.jpg}
 		\caption{Dspace图片}
 		\label{fig112}
 	\end{figure}
 
 \begin{table}[!htb]
-\caption {ds1006的技术规则}
+\caption {ds1006的技术规范}
 \label{algo:dspace}
 \begin{tabular} {|p{4cm}|p{10cm}|} \hline \hline
   参数&规格\\ \hline
@@ -128,52 +127,44 @@ To prove the performance of the proposed method for anomaly-based Detection, ano
 	
 	\begin{figure}[!htb]
 		\centering
-		\includegraphics[scale=0.26]{dataD/Temperature.png}
-		\caption{Temperature control system}
+		\includegraphics[scale=0.42]{dataD/Temperature.png}
+		\caption{温度控制系统结构图}
 		\label{fig113}
 	\end{figure}
 	
 	\begin{figure}[!htb]
 		\centering
-		\includegraphics[scale=0.34]{dataD/simulink_attack.jpg}
-		\caption{simulink layout of the system}
+		\includegraphics[scale=0.47]{dataD/simulink_attack.jpg}
+		\caption{温度控制系统Simulink仿真图}
 		\label{fig114}
 	\end{figure}
 	
-	Firstly, we implement \textit{brute-force \& fault-like attack}. We just make random data injection or sequence on the temperature sensors of the system. We execute two kinds of detection:fault-detection and anomaly-based detection. From the result, we obtain that both detection can work perfect. Fig.~\ref{fig15} and Fig.~\ref{fig16} show the detection result of the attack.
+
 	首先，我们对控制系统实行蛮力和类故障攻击，在系统控制器的输入端和温度传感器采集信号端之间我们注入随机的数据或者数据序列。然后我们对其进行两种不同的检测机制：故障检测和基于异常数据的入侵检测机制。从最后的检测结果来看，两种检测都能很好的完成攻击的检测和报警，图\ref{fig115}和图\ref{fig116}分别展示了检测结果。
 	
 	\begin{figure}[!htb]
 		\centering
-		\includegraphics[scale=0.26]{dataD/normalFaultDetection.png}
+		\includegraphics[scale=0.41]{dataD/normalFaultDetection.png}
 		\caption{用故障检测机制检测蛮力和类故障攻击}
 		\label{fig115}
 	\end{figure}
 	
 	\begin{figure}[!htb]
 		\centering
-		\includegraphics[scale=0.26]{dataD/normalAnomalyDetection.png}
+		\includegraphics[scale=0.41]{dataD/normalAnomalyDetection.png}
 		\caption{用基于异常数据的入侵检测机制检测蛮力和类故障攻击}
 		\label{fig116}
 	\end{figure}
 	
-	For the first type of attack, two detection both do the same algorithm to check new observed signal vector according to the expected output. Once any attack is detected, we will take care those comprised sensors, in 
-	Fig.~\ref{fig17} those are $Ta3,s3,s4$ and $Tb1,s1,,s2,s3,s4,s5$ to correct monitoring value in the legal scope. The red octagon is represent state, which suffer from \textit{brute-force \& fault-like attack}.
 	
 	对于第一类的攻击，两种检测机制都采用了相同的算法通过模型的估计输出来判断观测信号是否安全，一旦发现攻击我们会保存当前状态的输入信号所涉及到的所有可能受攻击的传感器。在图\ref{fig117}中我们需要保存的传感器变量为$Ta3,s3,s4$ 和 $Tb1,s1,,s2,s3,s4,s5$，而且只有分析可能受攻击的变量并调整到合法的范围才能使系统正常运作。图中红色的八边形表示了正在遭受蛮力和类故障攻击的状态节点。
 	\begin{figure}[!htb]
 		\centering
-		\includegraphics[scale=0.24]{dataD/graphForFault-detection.png}
+		\includegraphics[scale=0.40]{dataD/graphForFault-detection.png}
 		\caption{对蛮力和类故障攻击检测的状态转移图示}
 		\label{fig117}
 	\end{figure}
 	
-	Secondly, we implement \textit{disguised \& fault-detection-free attack}. We make specific false sequence injection on the temperature sensors, for instance, we take sequence of $Q0Q81Q82Q84Q85Q86Q96Q88
-	$ generated from False Sequence Attack Algorithm. $Q*$ stands for binary output vector, such as:\[\begin{split}
-	&Q0\Leftrightarrow 010101010100000\\
-	&Q81\Leftrightarrow 010101010100111
-	\end{split}
-	\]  We execute two kinds of detection:fault-detection and anomaly-based detection as well. From the result, we obtain that fault detection can not work and our anomaly-based detection work well. Fig.~\ref{fig18} and Fig.~\ref{fig19} show the detection result of the attack.
 
 	接下来，我们对控制系统实行隐蔽和避免故障检测的攻击，在系统控制器的输入端和温度传感器采集信号端之间我们注入特定的错误序列向量。例如我们通过从上章节的错误序列构造算法中生成错误序列$Q0Q81Q82Q84Q85Q86Q96Q88$，$Q*$代表控制器与物理设备交互的二进制输入和输出信号向量，比如$Q0$和$Q81Q81$的含义为\[\begin{split}
 	&Q0\Leftrightarrow 010101010100000\\
@@ -183,25 +174,24 @@ To prove the performance of the proposed method for anomaly-based Detection, ano
 	
 		\begin{figure}[!htb]
 			\centering
-			\includegraphics[scale=0.27]{dataD/anomalyFaultDetection.png}
+			\includegraphics[scale=0.46]{dataD/anomalyFaultDetection.png}
 			\caption{用故障检测机制检测隐蔽和避免故障检测的攻击}
 			\label{fig118}
 		\end{figure}
 		
 		\begin{figure}[!htb]
 			\centering
-			\includegraphics[scale=0.18]{dataD/anomalyAnomalyDetection.png}
+			\includegraphics[scale=0.34]{dataD/anomalyAnomalyDetection.png}
 			\caption{用基于异常数据的入侵检测机制检测隐蔽和避免故障检测的攻击}
 			\label{fig119}
 		\end{figure}
 	
-	For the second type of attack, anomaly-based detection not only checks new observed signal vector according to the expected output but also verifies whether history observed sequences conforming to substring of collected sequences. Once false sequence attack is detected, we also need to  those deal with comprised sensors, in 
-	Fig.~\ref{fig20} those are $Tb3,s1,s2,s3,s5$ and $Ta1,Tb5$ to correct monitoring value in the legal scope. The red octagon is represent state, which suffer from \textit{disguised \& fault-detection-free attack}.
+	
 	对于第二类的攻击，基于异常数据的入侵检测机制不仅可以通过模型的估计输出来判断观测信号是否安全而且能够通过从观测周期初始向量到当前观测向量组成的观测序列$\phi$是否存在于原始用来辨识模型的采样序列库中来确定是否存在错误序列注入攻击，一旦发现错误序列注入攻击我们同样会保存当前状态的输入信号所涉及到的所有可能受攻击的传感器。在图\ref{fig120}中我们需要保存的传感器变量为$Tb3,s1,s2,s3,s5$ 和 $Ta1,Tb5$，而且只有分析可能受攻击的变量并调整到合法的范围才能使系统正常运作。图中红色的八边形表示了正在遭受隐蔽和避免故障检测的攻击攻击的状态节点。
 	
 	\begin{figure}[!htb]
 		\centering
-		\includegraphics[scale=0.25]{dataD/graphAnomalyDetection.png}
+		\includegraphics[scale=0.40]{dataD/graphAnomalyDetection.png}
 		\caption{对隐蔽和避免故障检测的攻击检测的状态转移图示}
 		\label{fig120}
 	\end{figure}
