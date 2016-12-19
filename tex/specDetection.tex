@@ -127,7 +127,66 @@ JMP/LBL & 控制指令 & 跳转指令和标号指令，使主机可根据不同�
 
 第一步的主要目的是获得二进制函数输出从复杂的IL代码通过逐行解释上下文和语义在程序中。算法1首先将完整的程序划分为多个程序块，然后将每个程序块划分为多个网络块部分并初始化所有的集合。其次，我们对每个逻辑和控制指令执行符号解释以获得二进制函数结果。最后，当实现所有IL程序时，每个结果将从存储器输出。
 
-
+\begin{algorithm}[!htb]
+		\caption{IL2boolIL算法}
+		\begin{algorithmic}[1]
+			\REQUIRE %算法的输入参数：Input  
+			IL程序;
+			
+			\ENSURE %算法的输出：Output  
+			boolIL程序;  
+		
+			\STATE 将完整程序划分成多个程序块$V'$并将每个程序块划分为多个网络块$F$
+			\STATE 初始化并设置$V'= 1,F=\emptyset$;
+			\FOR{each $j \in SUM_{所有网络块部分}$}
+			\SWITCH{第$j$个网络块部分}
+			\CASE {$OP$部分}
+			\FOR{each $i \in SUM_{本网络块的总行数}$}
+			\SWITCH{第$i$行程序指令}
+			\CASE {$LD$($LND$)}
+			\STATE 设置相应的变量值为初始值（取反）输入并存入内存; 
+			\STATE break;
+			\ENDCASE：
+			\CASE {$A$($AN$)}
+			\STATE 设置相应的变量值为（取反）输入与($\&$)上前一指令的运算结果并存入内存;
+			\STATE break;
+			\ENDCASE
+			\CASE {$O$($ON$)}
+			\STATE 设置相应的变量值为（取反）输入或($|$)上前一指令的运算结果并存入内存; 
+			\STATE break;
+			\ENDCASE
+			\CASE {$TON/CTU/S/R$}
+			\STATE 定时器/计数器/置位/复位指令，需要进行抽象建模处理; 
+			\STATE break;
+			\ENDCASE
+			\ENDSWITCH
+			\ENDFOR
+			\ENDCASE
+		
+			\CASE {$ALD$($OLD$)}
+			\STATE 使前两个指令运算结果执行与$\&$（或$|$）操作并将执行结果入栈; 
+			\STATE break;
+			\ENDCASE
+			\CASE {$LPS/LPD/LPP$}
+			\STATE 存入/读取/弹出堆栈中前一指令的运算结果;
+			\STATE break;
+			\ENDCASE
+			\CASE {$JMP/LBL$}
+			\STATE 控制指令，需要进行抽象建模处理;
+			\STATE break;
+			\ENDCASE
+			\CASE {$=$}
+			\STATE 输出内存中的最终结果;
+			\STATE break;
+			\ENDCASE
+			\DEFAULT
+			\STATE Return $S_{x_{init}}$
+			\ENDDEFAULT
+			\ENDSWITCH
+			\ENDFOR
+			\STATE Return $S_{x_{init}}$
+		\end{algorithmic}
+	\end{algorithm}
 
 对于步骤二，我们需要通过步骤一的二进制输入函数的输出来实例化验证工具程序模板到可执行代码模型。在我们的工作中，我们采用NuSMV作为我们的模型检查器，因为它支持计算树逻辑（CTL）和线性时间逻辑（LTL）中表达的规范的分析，我们可以从我们的控制系统的安全规范中轻松获得。详细的实例化进度如图\ref{fig2}所示。图\ref{fig2}首先实例化所有输入，输出和pc计数。考虑初始化输入和输出是自动生成过程，因此主要任务是在执行下一个输出语句时为每个case语句分配每个pc执行语句。
 
