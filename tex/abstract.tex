@@ -4,15 +4,25 @@
 %%==================================================
 
 \begin{abstract}
+过程控制系统（PCS, Process Control Systems）的网络物理安全问题正在变得日趋严重，不管是从网络信息安全还是从物理数据完整性的角度，PCS所面临的安全风险和入侵威胁都在不断增加，而且伴随着工业安全事故的数量逐年增加，相应带来的破坏和灾难也越发严重。所以，PCS的网络信息安全和数据安全已经成为越来越需要全面和深入研究的国家基础设施和关键领域。正是在这种背景下，为了检测对PCS系统的入侵威胁，建立安全系统和关键国家基础设施安全的综合防御系统，本文针对PCS网络物理安全的入侵类型、控制器本身及其与物理设备交互数据的脆弱性特点，在面向PCS的攻击和入侵检测方法的研究和设计方面主要做了以下工作：
+\begin{enumerate}
+	\item 构造了基于故障检测机制错误序列注入（FSI）攻击，其可以避开现有的系统故障检测机制，通过感染和篡改PLC的输入信号迫使其执行误操作并破坏控制系统的关键设备。首先我们对PLC控制器和物理设备之间交换的信号或堆栈数据进行采集；然后利用输入和输出向量数据库，我们辨识出与故障检测的建模方法类似的无故障的离散事件模型；最后，我们搜索所有的不可被故障机制检测的虚假序列的集合，并且获得适当长度的恶意序列对受控制的传感器采集的输入信号进行篡改实施攻击。
+	\item 设计了基于异常数据的入侵检测机制，其针对控制系统中控制器接收来自本地和远程输入信号的完整性和安全性而设计，并且考虑到错误序列注入攻击序列构造特性设计了有效的FSI检测算法。与攻击建模类似，首先采样数据库，辨识出能够高度复现待检测系统的无故障离散事件模型；然后针对异常数据注入攻击的特点，分为两个阶段设计异常数据检测算法。第一阶段将监测的控制器输入信号与模型的预期输出残差对比判断是否数据异常；第二阶段对隐蔽的错误序列注入攻击设计额外FSI检测算法来避免此类型的攻击；最后对检测存在异常的数据分析判断，定位到具体攻击源并给出相应的应对措施。
+	\item 设计基于规范的入侵检测设计，其针对可编程控制器本身控制程序和指令的保护并使其免受恶意代码注入而设计，只有经过验证合法的程序和指令才能从操作系统或控制服务器上传到指定的可编程控制器设备中。首先将PLC代码（IL code）格式化整理并通过IL2boolIL算法转换为中间语言；然后布尔逻辑指令表代码通过模板实例化（Template Instantiate）过程被迭代地执行转化，将通用模板代码实例化为验证工具NuSMV输入程序；最后我们通过将得到的形式化代码模型（NuSMV code）输入到验证工具NuSMV逐个地检查我们的安全规范，每个布尔规范表示有限状态机中的安全属性是否为真，如果存在任何可达的路径其属性为假，则会给出相应的反例并证明存在安全违规不能上传到PLC设备中。
+\end{enumerate}
 
 
-
-\keywords{\large  \quad 饮 \quad 爱国}
+\keywords{\large 过程控制系统  \quad 网络物理安全 \quad 入侵检测 \quad 错误序列注入 \quad FSI检测 \quad 模型检测}
 \end{abstract}
 
 \begin{englishabstract}
+The network physical security problem of PCS (Process Control Systems) is becoming more and more serious. The security risks and intrusion threats of PCS are increasing from the point of network information security and physical data integrity. And with the number of industrial safety accidents increasing, the corresponding damage and disaster is also more serious. Therefore, PCS network information security and data security needs more and more comprehensive and in-depth study as the national infrastructure and key areas. Based on such background, in order to detect intrusion threats to PCS system and establish the integrated defense system of security system and key national infrastructure security, this paper aims at the intrusion type of PCS network physical security, the controller itself and its interaction with physical equipment Data vulnerability, and we do the following work judged on research and design of the PCS-oriented attack and intrusion detection methods:
+\begin{enumerate}
+\item Constructed false sequence injection (FSI) attacks based on the fault detection mechanism, which can avoid the existing system fault detection mechanism, by infecting and tampering the input signal of the PLC to force it to perform mis-operation and destroy the key equipment of the control system. First, we collect the signals or stack data exchanged between the PLC controller and the physical device. Then we use the input and output vector databases to identify a fault-free discrete event model similar to the fault detection modeling method. Finally, Searching all the false sequences which can not be detected by the fault mechanism, and obtaining the malicious sequence of the appropriate length to inject the attack on the input signal collected by the controlled sensor.
+\item Designed the intrusion detection mechanism based on anomaly data, which is designed for the controller in the control system to receive the integrity and security of the local and remote input signals, and designed the effective FSI detection algorithm in consideration of the construction of the FSI attack sequence. Similar to the attack modeling, we first sampled the database and identified the fault-free discrete event model which can highly reproduce the system to be detected. Then, we divide the abnormal data into two phases to design the anomaly data detection algorithm. In the first stage, the input signal of the monitored controller is compared with the predicted output residual of the model to judge whether the data is abnormal. The second stage is to design the additional FSI detection algorithm to avoid the attack. In the end, we analysis the data , locate the specific attack source and give the corresponding response measures.
+\item Design the intrusion detection based on safety specifications, which is designed for the the control programs and instructions of programmable controller  to protect them from malicious code injection.Only validated programs and instructions can be uploaded from the operating system or the control server To the specified programmable controller device. First, the PLC code (IL code) formatted by IL2boolIL algorithm into intermediate language; and then Boolean logic instruction code is iterative implementation of the transformation that generates the generic template code instantiation for the verification tool NuSMV input programs through the template instantiation (Template Instantiate) process; Finally, we will check our safety standards be through the formal code model (NuSMV code) input to the verification tool NuSMV one by one. Each Boolean specification denotes that whether security attributes in the finite state machine are true, if there is any attribute of the reachable path is FALSE, the corresponding counter-example is given and can not be uploaded to the PLC.
+\end{enumerate}
 
-
-\englishkeywords{\large SJTU, master thesis, XeTeX/LaTeX template}
+\englishkeywords{\large process control system \quad network physical security \quad intrusion detection \quad false sequence injection \quad FSI detection \quad model detection}
 \end{englishabstract}
 

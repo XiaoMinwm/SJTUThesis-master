@@ -60,7 +60,7 @@
 \RequirePackage{upgreek}
 \RequirePackage{graphicx}
 \RequirePackage{subfigure}
-\RequirePackage{ccaption}
+\RequirePackage{ccaption,caption}
 \RequirePackage[backend=biber, style=caspervector,utf8, bibencoding=utf8, sorting=none]{biblatex}
 \RequirePackage{xcolor}
 \RequirePackage{wasysym}
@@ -79,6 +79,7 @@
 %==========
 % Segment 2. Define general-purpose LaTeX commands.
 %==========
+
 
 \setcounter{secnumdepth}{4}  % 章节编号深度 (part 对应 -1)
 \setcounter{tocdepth}{2}     % 目录深度 (part 对应 -1)
