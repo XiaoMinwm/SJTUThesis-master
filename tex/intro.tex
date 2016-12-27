@@ -28,7 +28,7 @@ PCS系统在全世界范围内不间断地监控和运行关键性的工业基�
 2010年，Stuxnet计算机蠕虫感染在伊朗的14个工业现场的PLC，包括铀浓缩厂\parencite{Kushner07,Chen11}。它通过受感染的USB闪存驱动器侵入到目标系统，然后Stuxnet通过感染可移动驱动器，在网络共享资源中复制本身并利用未修补的漏洞在网络中隐藏地传播，指示受感染的计算机连接到外部命令和控制服务器。最后中央服务器对PLC进行重新编程，以修改离心机的操作，以便由受损的PLC将它们分开\parencite{Line14}。
 
 在2015年，两个黑客展示了一个车辆的遥控器\parencite{Miller15}。 零日漏洞使黑客无线控制车辆。车辆娱乐系统中的软件漏洞允许黑客对其进行远程控制，包括仪表板功能，转向，制动和传输，从而实现恶意动作，例如控制空调和音频，禁用发动机和制动器，以及控制车轮\parencite{Thomas15}。据权威统计，截止2015年底，全球发生800余起针对工业控制系统的攻击事件，尤其是在最近几年存在越演越烈的趋势，具体如图\ref{pcsattack}所示。
-\captionsetup[figure]{labelfont={bf},name={Fig.},labelsep=period}
+%\captionsetup[figure]{labelfont={bf},name={Fig.},labelsep=period}
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=14cm]{intro/PCSAttackEvent.png}
@@ -71,7 +71,7 @@ PCS系统在全世界范围内不间断地监控和运行关键性的工业基�
 
 平面网络：许多PCS网络仍然被实现为不相关子系统之间没有隔离的大且“平坦”网络。这意味着如果在设备中一部分出现问题，它可以非常快地传播到其他不相关的子系统，甚至到远程工厂站点。
 
-根据参考文献\parencite{Byres09},对于PCS网络和IT网络的不同总结如下表\ref{intro:diffBetweenPCSandIT}
+根据参考文献\parencite{Byres09},对于PCS网络和IT网络的不同总结如下表\ref{intro:diffBetweenPCSandIT}:
 \newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
 \begin{table}[!htp]
 \centering
